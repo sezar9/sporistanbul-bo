@@ -2,7 +2,7 @@ import os
 import time
 import requests
 import smtplib
-import winsound
+import platform
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from selenium import webdriver
@@ -14,6 +14,15 @@ from dotenv import load_dotenv
 
 # === .env Dosyasını Yükle ===
 load_dotenv()
+
+# === winsound sadece Windows'ta çalışsın ===
+if platform.system() == "Windows":
+    import winsound
+else:
+    class winsound:
+        @staticmethod
+        def Beep(freq, dur):
+            print(f"(Beep {freq}Hz {dur}ms - Linux ortamı, ses çalma pasif)")
 
 # === Kullanıcı Bilgileri ===
 USERNAME = os.getenv("USERNAME", "30472669726")
@@ -60,7 +69,7 @@ def send_email(subject, message):
 
 # === Tarayıcı Ayarları ===
 options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
+options.add_argument("--headless")  # Render ortamında GUI yok, o yüzden headless
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
@@ -122,7 +131,6 @@ try:
                 continue
 
         if uygun_bulundu:
-            # 🔔 Sesli ve Telegram + Mail uyarısı
             for _ in range(3):
                 winsound.Beep(1500, 700)
 
@@ -135,7 +143,6 @@ try:
         if sayac % 120 == 0:
             send_telegram("🤖 Sistem halen çalışıyor...")
 
-        # Sayfayı yenile
         time.sleep(120)
         driver.refresh()
         time.sleep(5)
